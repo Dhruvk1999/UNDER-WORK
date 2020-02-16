@@ -1,6 +1,7 @@
 //product design
 #include<ESP8266Wifi.h>
-const char* ssid = "MY_Network";    //communication
+
+const char* ssid = "MY_Network";    //set up for a wifi network to connect to internet
 const char* password="PassWord";
 #define IR 13  //sensor
 #define RELAY 12 //relay subsystem 2 connected to light
