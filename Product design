@@ -52,3 +52,4 @@ void callback(char* topic, byte* payload, unsigned int length) {
 //first step is to declare it as input or output
 //enter https://cloud.arest.io/9u2co4/mode/5/o this sets pin 5 as the output
 //https://cloud.arest.io/9u2co4/digital/5/1 this sets pin 5 HIGH replace 1 with 0 for low
+//blah...blah....blah
