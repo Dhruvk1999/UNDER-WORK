@@ -46,7 +46,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 //Some more insructions
 //to check if the board is online
 //login to arest
-//to actually test it, go to your favorite web browser,http://cloud.arest.io/(device id as in the code)/id
+//to actually test it, go to your  web browser,http://cloud.arest.io/(device id as in the code)/id
 //if getting some message the board is online
 //turniing pins on or off
 //first step is to declare it as input or output
