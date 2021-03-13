@@ -1,0 +1,150 @@
+#include <LiquidCrystal.h>
+#include <BlynkSimpleStream.h>
+#include <DS3231.h>
+DS3231  rtc(A1, A2);
+char auth[] = "_XItYcAYiqGGLFVsnn8dseqAmH2WRZa-"; 
+const int rs = 12, en = 11, d4 = 10, d5 = 9, d6 = 8, d7 = 7;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal lcd1(22, 23, 24, 25, 26, 27);
+const int r1=28,r2=29,r3=30,pir=32,buzz=33,trig=31,echo=34,ldr=A0,light=6;
+const int r2input=35,r3input=36;
+float duration;
+int distance,ldrval;
+WidgetLED led1 (V3);  
+WidgetLED led2 (V4);
+int current,pervious=0,cur,pre=0;
+//------------------------------------setup---------------------------------------------
+void setup() {
+  Serial.begin(9600);
+  Blynk.begin(auth, Serial);
+  lcd.begin(20,4);
+  lcd1.begin(20,4);
+  pinMode(r1,OUTPUT);
+  pinMode(r2,OUTPUT);
+  pinMode(r3,OUTPUT);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  pinMode(pir,INPUT);
+  pinMode(buzz,OUTPUT);
+  pinMode(ldr,INPUT);
+  pinMode(light,OUTPUT);
+  pinMode(r2input,INPUT);
+  pinMode(r3input,INPUT);
+  lcd.setCursor(0,0);
+  lcd.print("last action was");
+  lcd.setCursor(0,1);
+  lcd.print("---------------");
+ lcd.print("hello, world!");
+ lcd.setCursor(0,2); 
+ lcd.print("fan is off");
+ lcd.setCursor(0,3);
+ lcd.print("light is off");
+
+ rtc.setDOW(WEDNESDAY);     
+ rtc.setTime(12, 0, 0);     
+ rtc.setDate(12, 3, 2021);
+}
+//---------------------------------------loop---------------------------------------------------
+void loop() {
+  ldrcheck();
+  doorcheck();
+  Blynk.run();
+  updatevalue();
+}
+//------------------------------------------upadting the values------------------------
+void updatevalue() {
+  current=digitalRead(r2input);
+  cur=digitalRead(r3input);
+  if(current!=pervious){
+    pervious=current;
+    if(current==1)
+     {
+      lcd.setCursor(0,3);
+      lcd.print("light is on ");
+      lcd.setCursor(0,1);
+      lcd.print("light was turned on ");
+     }
+    else{
+      lcd.setCursor(0,3);
+      lcd.print("light is off");
+      lcd.setCursor(0,1);
+      lcd.print("light was turned off");  
+    }
+   }
+  if(cur!=pre){
+    pre=cur;
+    if(cur==1)
+     {lcd.setCursor(0,2);
+      lcd.print("fan is on   ");
+      lcd.setCursor(0,1);
+      lcd.print("fan was turned on   ");
+      }
+      else{
+      lcd.setCursor(0,2);
+      lcd.print("fan is off  ");
+      lcd.setCursor(0,1);
+      lcd.print("fan was turned off  ");  
+      }
+  }
+}
+//------------------------------------------blynk codes--------------------------------
+ BLYNK_WRITE(V1) //Button Widget is writing to pin V1
+{
+  int pinData = param.asInt(); 
+  if(pinData==1){
+    digitalWrite(r2, HIGH);
+  }else{
+    digitalWrite(r2, LOW);
+  }
+}
+ BLYNK_WRITE(V2) //Button Widget is writing to pin V1
+{
+  int pinData = param.asInt(); 
+  if(pinData==1){
+    digitalWrite(r3, HIGH);
+    }
+    else{
+    digitalWrite(r3, LOW);
+    }
+}
+
+//-------------------------------------------ldr check----------------------------------
+void ldrcheck(){
+ldrval=analogRead(ldr);
+analogWrite(light,225-(map(ldrval,0,1023,0,255)));
+if(ldrval<=300){
+  digitalWrite(r1,LOW);
+  led2.on();
+}
+else{
+  digitalWrite(r1,HIGH);
+  led2.off();
+}}
+//-----------------------------------------------door check--------------------------
+
+int ultrasoniccheck(){
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance = 0.017 * duration;
+  
+  return(distance);
+}
+
+
+void doorcheck(){ 
+  if(digitalRead(pir)==1){
+    if(ultrasoniccheck()<=100)
+       {digitalWrite(buzz,HIGH);
+       led1.on();
+       } 
+       else{
+  digitalWrite(buzz,LOW);
+  led1.off();
+  }}
+ else{
+  digitalWrite(buzz,LOW);
+  led1.off();
+ }}
